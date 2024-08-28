@@ -16,11 +16,15 @@ export class LinkedInActions {
   }
 
   async logout(): Promise<void> {
-    await this.page.click('button[class^="global-nav__primary-link"]');
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    await this.page.click('a[href^="/m/logout/"]');
-    await this.page.click('span:has-text("Sign out")');
-    await this.page.waitForNavigation();
+    try {
+      await this.page.goto("https://www.linkedin.com/m/logout/");
+      await this.page.waitForSelector(
+        'h1:text("Welcome to your professional community")',
+        { timeout: 10000 }
+      );
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   async initiate(url: string, message: string): Promise<void> {
