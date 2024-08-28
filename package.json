@@ -1,0 +1,35 @@
+{
+  "name": "linkedin-bot",
+  "version": "1.0.0",
+  "description": "A bot for automating LinkedIn tasks",
+  "main": "main.ts",
+  "scripts": {
+    "start": "ts-node main.ts",
+    "lint": "eslint src/* main.ts --fix",
+    "type-check": "tsc --pretty --noEmit --incremental"
+  },
+  "keywords": [
+    "linkedin",
+    "bot",
+    "automation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@langchain/openai": "^0.2.8",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "puppeteer": "^23.2.0",
+    "puppeteer-core": "^19.7.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@typescript-eslint/eslint-plugin": "^8.3.0",
+    "@typescript-eslint/parser": "^8.3.0",
+    "eslint": "^9.9.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-import-order": "^2.1.4",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.3.0"
+  }
+}

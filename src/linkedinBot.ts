@@ -1,0 +1,59 @@
+import puppeteer, { Browser, Page } from "puppeteer";
+
+import { LinkedInActions } from "./linkedinActions";
+import { setupLLM } from "./llmUtils";
+import { checkSecurity } from "./securityCheck";
+
+export class LinkedInBot {
+  private browser: Browser | null = null;
+  private page: Page | null = null;
+  private actions: LinkedInActions | null = null;
+
+  async initialize(): Promise<void> {
+    this.browser = await puppeteer.launch({
+      headless: false,
+      defaultViewport: null,
+      args: ["--start-fullscreen"],
+    });
+    this.page = await this.browser.newPage();
+    this.actions = new LinkedInActions(this.page);
+  }
+
+  async run(
+    email: string,
+    password: string,
+    urls: string[],
+    messages: string[]
+  ): Promise<void> {
+    if (!this.browser || !this.page || !this.actions) {
+      throw new Error("Bot not initialized");
+    }
+
+    try {
+      await this.actions.login(email, password);
+      console.log("Login Successful!");
+      await checkSecurity(this.page, setupLLM());
+
+      for (let i = 0; i < urls.length; i++) {
+        try {
+          console.log(`Proceeding with ${urls[i]}`);
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          await this.actions.initiate(urls[i], messages[i]);
+        } catch (e) {
+          console.error(`Error Occurred with ${urls[i]}: `, e);
+        }
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log("Signing out");
+      await this.actions.logout();
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log("Finished Processing");
+    } catch (e) {
+      console.error("Error occurred: ", e);
+      throw e;
+    } finally {
+      await this.browser.close();
+    }
+  }
+}
