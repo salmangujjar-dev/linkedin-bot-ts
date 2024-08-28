@@ -9,13 +9,16 @@ export class LinkedInBot {
   private page: Page | null = null;
   private actions: LinkedInActions | null = null;
 
-  async initialize(): Promise<void> {
+  async initialize(cookies?: any[]): Promise<void> {
     this.browser = await puppeteer.launch({
       headless: false,
       defaultViewport: null,
       args: ["--start-fullscreen"],
     });
     this.page = await this.browser.newPage();
+    if (cookies) {
+      await this.page.setCookie(...cookies);
+    }
     this.actions = new LinkedInActions(this.page);
   }
 
@@ -23,16 +26,23 @@ export class LinkedInBot {
     email: string,
     password: string,
     urls: string[],
-    messages: string[]
+    messages: string[],
+    isCookieLogin = false
   ): Promise<void> {
     if (!this.browser || !this.page || !this.actions) {
       throw new Error("Bot not initialized");
     }
 
     try {
-      await this.actions.login(email, password);
-      console.log("Login Successful!");
-      await checkSecurity(this.page, setupLLM());
+      if (isCookieLogin) {
+        await this.page.goto("https://www.linkedin.com");
+      } else {
+        await this.actions.login(email, password);
+        console.log("Login Successful!");
+        await checkSecurity(this.page, setupLLM());
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       for (let i = 0; i < urls.length; i++) {
         try {
@@ -55,5 +65,13 @@ export class LinkedInBot {
     } finally {
       await this.browser.close();
     }
+  }
+
+  async closeBrowser(): Promise<void> {
+    if (!this.browser) {
+      throw new Error("Bot not initialized");
+    }
+
+    await this.browser.close();
   }
 }

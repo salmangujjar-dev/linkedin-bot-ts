@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
+import fs from "fs";
 
 import { LinkedInBot } from "./src/linkedinBot";
 
@@ -27,6 +28,7 @@ app.post("/linkedin/send_invites", async (req, res) => {
   const bot = new LinkedInBot();
   const sessionKey = process.env.LINKEDIN_EMAIL;
   const sessionPassword = process.env.LINKEDIN_PASSWORD;
+  const isCookieLogin = true;
 
   if (!sessionKey || !sessionPassword) {
     return res.status(500).json({
@@ -35,17 +37,29 @@ app.post("/linkedin/send_invites", async (req, res) => {
   }
 
   try {
+    const cookies = JSON.parse(fs.readFileSync("./cookies.json", "utf-8"));
     console.log("Initializing Bot");
-    await bot.initialize();
+    cookies.forEach((cookie: { sameSite: string }) => {
+      if (cookie.sameSite === "no_restriction" || cookie.sameSite === null) {
+        cookie.sameSite = "none";
+      }
+      return cookie;
+    });
+
+    await bot.initialize(cookies);
     console.log("Bot Initialized");
+
     await bot.run(
       sessionKey,
       sessionPassword,
       messageData.urls,
-      messageData.messages
+      messageData.messages,
+      isCookieLogin
     );
     res.json({ status: "success", message: "Messages sent successfully" });
   } catch (e) {
+    bot.closeBrowser();
+    console.error(e);
     res.status(500).json({ error: `An error occurred: ${e}` });
   }
 });
