@@ -23,11 +23,11 @@ export class LinkedInBot {
   }
 
   async run(
-    email: string,
-    password: string,
     urls: string[],
     messages: string[],
-    isCookieLogin = false
+    isCookieLogin = false,
+    email?: string,
+    password?: string
   ): Promise<void> {
     if (!this.browser || !this.page || !this.actions) {
       throw new Error("Bot not initialized");
@@ -37,7 +37,7 @@ export class LinkedInBot {
       if (isCookieLogin) {
         await this.page.goto("https://www.linkedin.com");
       } else {
-        await this.actions.login(email, password);
+        await this.actions.login(email!, password!);
         console.log("Login Successful!");
         await checkSecurity(this.page, setupLLM());
       }

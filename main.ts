@@ -28,7 +28,7 @@ app.post("/linkedin/send_invites", async (req, res) => {
   const bot = new LinkedInBot();
   const sessionKey = process.env.LINKEDIN_EMAIL;
   const sessionPassword = process.env.LINKEDIN_PASSWORD;
-  const isCookieLogin = true;
+  const isCookieLogin = process.env.IS_COOKIE_LOGIN === "true";
 
   if (!sessionKey || !sessionPassword) {
     return res.status(500).json({
@@ -37,24 +37,27 @@ app.post("/linkedin/send_invites", async (req, res) => {
   }
 
   try {
-    const cookies = JSON.parse(fs.readFileSync("./cookies.json", "utf-8"));
-    console.log("Initializing Bot");
-    cookies.forEach((cookie: { sameSite: string }) => {
-      if (cookie.sameSite === "no_restriction" || cookie.sameSite === null) {
-        cookie.sameSite = "none";
-      }
-      return cookie;
-    });
+    let cookies;
+    if (isCookieLogin) {
+      cookies = JSON.parse(fs.readFileSync("./cookies.json", "utf-8"));
+      cookies.forEach((cookie: { sameSite: string }) => {
+        if (cookie.sameSite === "no_restriction" || cookie.sameSite === null) {
+          cookie.sameSite = "none";
+        }
+        return cookie;
+      });
+    }
+    console.log(`Initializing Bot - Cookies(${isCookieLogin})`);
 
     await bot.initialize(cookies);
     console.log("Bot Initialized");
 
     await bot.run(
-      sessionKey,
-      sessionPassword,
       messageData.urls,
       messageData.messages,
-      isCookieLogin
+      isCookieLogin,
+      sessionKey,
+      sessionPassword
     );
     res.json({ status: "success", message: "Messages sent successfully" });
   } catch (e) {
