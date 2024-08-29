@@ -1,5 +1,5 @@
 {
-  "name": "linkedin-bot",
+  "name": "linkedin-bot-ts",
   "version": "1.0.0",
   "description": "A bot for automating LinkedIn tasks",
   "main": "main.ts",

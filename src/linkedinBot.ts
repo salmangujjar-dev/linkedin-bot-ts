@@ -55,9 +55,9 @@ export class LinkedInBot {
       }
 
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Signing out");
-      await this.actions.logout();
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // console.log("Signing out");
+      // await this.actions.logout();
+      // await new Promise((resolve) => setTimeout(resolve, 2000));
       console.log("Finished Processing");
     } catch (e) {
       console.error("Error occurred: ", e);
